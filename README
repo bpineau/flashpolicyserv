@@ -1,0 +1,29 @@
+NAME
+     flashpolicyserv — simple Flash socket policy server
+
+SYNOPSIS
+     flashpolicyserv [-f file] [-p port] [-u user] [-c directory]
+
+DESCRIPTION
+     flashpolicyserv is a simple daemon serving XML socket policy files to
+     Flash clients.
+
+     The options are as follows:
+
+     -f file
+             Serve the XML policy from file.  Default: /etc/flash_policy.xml.
+             You have to restart the daemon in order to reload the file.
+
+     -p port
+             Listen on port.  Default: 843.
+
+     -u user
+             Drop privileges for user on startup. Default: nobody.
+
+     -c directory
+             chroot(2) to directory on starturp. Default: /var/run.
+
+SEE ALSO
+     http://www.adobe.com/devnet/flashplayer/articles/fplayer9_security.html,
+     http://www.adobe.com/devnet/flashplayer/articles/socket_policy_files.html
+
