@@ -1,3 +1,10 @@
+flashpolicyserv is a very simple daemon which serves an XML socket policy
+file to Flash clients. Written in C, uses libevent, chroots and drops
+privileges.
+
+To compile, install libevent (Debian / Ubuntu : apt-get install libevent-dev)
+then make && make install.
+
 NAME
      flashpolicyserv — simple Flash socket policy server
 
