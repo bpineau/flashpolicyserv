@@ -3,7 +3,6 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 #include <errno.h>
-#include <event.h>
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
@@ -12,12 +11,12 @@
 #include <string.h>
 #include <syslog.h>
 #include <unistd.h>
-
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <event.h>
 
 #define DFLT_PORT 843
 #define DFLT_FILE "/etc/flash_policy.xml"
