@@ -56,9 +56,8 @@ void write_cb(struct bufferevent *bev, void *arg)
 	}
 
 	evreturn = evbuffer_new();
-	/* we should return a null byte after policy content */
+	/* include a terminal null byte, per flash's requirements */
 	evbuffer_add(evreturn, policy, strlen(policy) + 1);
-	//evbuffer_add_printf(evreturn, "%s", policy);
 	bufferevent_write_buffer(bev, evreturn);
 	bufferevent_settimeout(bev, 5, 5);
 	evbuffer_free(evreturn);
