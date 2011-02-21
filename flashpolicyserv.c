@@ -94,7 +94,7 @@ void accept_cb(int fd, short ev, void *arg)
 	client = calloc(1, sizeof(*client));
 	if (client == NULL) {
 		syslog(LOG_ERR, "malloc failed");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	client->sent = 0;
 	client->fd = client_fd;
@@ -105,32 +105,32 @@ void accept_cb(int fd, short ev, void *arg)
 	bufferevent_enable(client->buf_ev, EV_WRITE);
 }
 
-void loadpolicy(char *file)
+void load_policy(char *file)
 {
 	struct stat st;
 	int fd;
 
 	if ((stat(file, &st)) < 0) {
 		syslog(LOG_ERR, "stat(%s) failed: %s", file, strerror(errno));
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
-	/* plus one byte for null byte ending */
+	/* alloc one extra byte for null byte ending */
 	if ((policy = calloc(1, st.st_size + 1)) == NULL) {
 		syslog(LOG_ERR, "malloc failed");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	if ((fd = open(file, O_RDONLY)) < 0) {
 		syslog(LOG_ERR, "open(%s) failed: %s", file, strerror(errno));
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	read(fd, policy, st.st_size);
 	close(fd);
 }
 
-int getsock(int port)
+int get_sock(int port)
 {
 	struct sockaddr_in saddr;
 	int sock;
@@ -138,7 +138,7 @@ int getsock(int port)
 
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		syslog(LOG_ERR, "socket failed: %s", strerror(errno));
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	memset(&saddr, 0, sizeof(saddr));
@@ -149,12 +149,12 @@ int getsock(int port)
 
 	if (bind(sock, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
 		syslog(LOG_ERR, "bind failed: %s", strerror(errno));
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (listen(sock, 5) < 0) {
 		syslog(LOG_ERR, "listen failed: %s", strerror(errno));
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
@@ -188,24 +188,28 @@ void daemonize(char *dir, char *user)
                                 user, strerror(errno));
                 exit(EXIT_FAILURE);
         }
-                        ;;
+
         if ((pid = fork()) < 0) {
                 fprintf(stderr, "fork failed: %s\n",
                                 strerror(errno));
                 exit(EXIT_FAILURE);
         }
+
         if (pid > 0)
                 _exit(0);
+
         if (setsid() < 0) {
                 syslog(LOG_ERR, "setsid() failed: %s\n",
                                 strerror(errno));
                 exit(EXIT_FAILURE);
         }
+
         if ((pid = fork()) < 0) {
                 syslog(LOG_ERR, "fork (2) failed: %s\n",
                                 strerror(errno));
                 exit(EXIT_FAILURE);
         }
+
         if (pid > 0) {
         	if (pidfd != NULL) {
                 	fprintf(pidfd, "%d\n", pid);
@@ -213,32 +217,38 @@ void daemonize(char *dir, char *user)
 		}
                 _exit(0);
 	}
+
         if (!freopen("/dev/null", "r", stdin)  ||
             !freopen("/dev/null", "w", stdout) ||
             !freopen("/dev/null", "w", stderr)) {
                 syslog(LOG_WARNING, "close std fds %s failed: %s\n",
                                 dir, strerror(errno));
         }
+
         if (chroot(dir) < 0) {
                 syslog(LOG_ERR, "chroot(%s) failed: %s\n",
                                 dir, strerror(errno));
                 exit(EXIT_FAILURE);
         }
+
         if (chdir("/") < 0) {
                 syslog(LOG_ERR, "chdir(\"/\") failed: %s\n",
                                 strerror(errno));
                 exit(EXIT_FAILURE);
         }
+
         if (setgroups(1, &pw->pw_gid) < 0) {
                 syslog(LOG_ERR, "setgroups() failed: %s\n",
                                 strerror(errno));
                 exit(EXIT_FAILURE);
         }
+
         if (setgid(pw->pw_gid)) {
                 syslog(LOG_ERR, "setgid %i (user=%s) failed: %s\n",
                                 pw->pw_gid, user, strerror(errno));
                 exit(EXIT_FAILURE);
         }
+
         if (setuid(pw->pw_uid)) {
                 syslog(LOG_ERR, "setuid %i (user=%s) failed: %s\n",
                                 pw->pw_uid, user, strerror(errno));
@@ -289,8 +299,8 @@ int main(int argc, char **argv)
         openlog(__progname, LOG_PID | LOG_PERROR, LOG_DAEMON);
 	syslog(LOG_INFO, "starting");
 
-	loadpolicy(file);
-	sock = getsock(port);
+	load_policy(file);
+	sock = get_sock(port);
 	daemonize(chrootdir, username);
 
 	loop_event(sock);
