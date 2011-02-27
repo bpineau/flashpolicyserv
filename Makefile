@@ -5,8 +5,8 @@ flashpolicyserv:
 all: flashpolicyserv
 
 install: flashpolicyserv
-	install -m 755 flashpolicyserv /usr/sbin/flashpolicyserv
-	install -m 644 flashpolicyserv.8 /usr/share/man/man8/
+	install -D -m 755 flashpolicyserv $(DESTDIR)/usr/sbin/flashpolicyserv
+	install -D -m 644 flashpolicyserv.8 $(DESTDIR)/usr/share/man/man8/flashpolicyserv.8
 
 clean:
 	rm -f flashpolicyserv
